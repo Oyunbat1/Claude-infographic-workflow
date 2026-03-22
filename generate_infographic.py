@@ -15,6 +15,7 @@ import sys
 import time
 import threading
 import argparse
+from datetime import datetime
 
 try:
     import replicate
@@ -92,14 +93,17 @@ def main():
         if isinstance(output, list):
             output = output[0]
 
-        # Download the image
+        # Download the image — add timestamp to preserve previous images
         import urllib.request
-        os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
-        urllib.request.urlretrieve(str(output), args.output)
+        base, ext = os.path.splitext(args.output)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = f"{base}_{timestamp}{ext}"
+        os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+        urllib.request.urlretrieve(str(output), output_path)
 
-        file_size = os.path.getsize(args.output)
-        print(f"✅ Хадгалагдлаа: {args.output} ({file_size / 1024:.1f} KB)", file=sys.stderr)
-        print(args.output)
+        file_size = os.path.getsize(output_path)
+        print(f"✅ Хадгалагдлаа: {output_path} ({file_size / 1024:.1f} KB)", file=sys.stderr)
+        print(output_path)
 
     except Exception as e:
         stop_event.set()
